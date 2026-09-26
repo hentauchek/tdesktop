@@ -244,15 +244,26 @@ jobs:
 
       - name: Package artifact.
         if: (env.UPLOAD_ARTIFACT == 'true') || (github.ref == 'refs/heads/nightly')
+        continue-on-error: true
+        shell: pwsh
         run: |
-          set OUT=%TBUILD%\%REPO_NAME%\out\Debug
-          mkdir artifact
-          copy /y %OUT%\Telegram.exe artifact/
-          copy /y %OUT%\Updater.exe artifact/
-          set QTDIR=
-          for /d %%d in ("%LibrariesPath%\Qt-*") do set QTDIR=%%~fd
-          echo Qt directory: %QTDIR%
-          "%QTDIR%\bin\windeployqt.exe" --no-translations --no-system-d3d-compiler --no-opengl-sw --compiler-runtime artifact\Telegram.exe
+          $ErrorActionPreference = 'Stop'
+          $builddir = "$env:TBUILD\$env:REPO_NAME\out"
+          $exe = Get-ChildItem -Path $builddir -Filter 'Telegram.exe' -Recurse -File -ErrorAction SilentlyContinue | Select-Object -First 1
+          if (-not $exe) {
+            Write-Host "Telegram.exe not found under $builddir"
+            Get-ChildItem -Path $builddir -Filter '*.exe' -Recurse -File -ErrorAction SilentlyContinue | Select-Object -First 40 -ExpandProperty FullName
+            exit 1
+          }
+          Write-Host "Using $($exe.FullName)"
+          New-Item -ItemType Directory -Force -Path artifact | Out-Null
+          Copy-Item -Force $exe.FullName artifact\Telegram.exe
+          $updater = Get-ChildItem -Path $builddir -Filter 'Updater.exe' -Recurse -File -ErrorAction SilentlyContinue | Select-Object -First 1
+          if ($updater) { Copy-Item -Force $updater.FullName artifact\Updater.exe }
+          $qtdir = (Get-ChildItem -Path "$env:LibrariesPath" -Directory -Filter 'Qt-*' -ErrorAction SilentlyContinue | Select-Object -First 1).FullName
+          Write-Host "Qt directory: $qtdir"
+          & "$qtdir\bin\windeployqt.exe" --no-translations --compiler-runtime artifact\Telegram.exe
+          Get-ChildItem artifact | Select-Object Name, Length | Format-Table
       - uses: actions/upload-artifact@v7
         name: Upload artifact.
         if: (env.UPLOAD_ARTIFACT == 'true') || (github.ref == 'refs/heads/nightly')
