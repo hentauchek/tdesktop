@@ -158,7 +158,16 @@ jobs:
           key: ${{ runner.OS }}-${{ matrix.arch }}-${{ matrix.qt || 'qt' }}-${{ env.CACHE_KEY }}
           restore-keys: ${{ runner.OS }}-${{ matrix.arch }}-${{ matrix.qt || 'qt' }}-
 
+      - name: Disable Defender.
+        shell: pwsh
+        run: |
+          Set-MpPreference -DisableRealtimeMonitoring $true
+          Add-MpPreference -ExclusionPath "$env:GITHUB_WORKSPACE"
+          Add-MpPreference -ExclusionPath "$env:GITHUB_WORKSPACE\TBuild"
+          Get-MpPreference | Select-Object -ExpandProperty ExclusionPath
+
       - name: Libraries.
+        timeout-minutes: 90
         run: |
           %TBUILD%\%REPO_NAME%\Telegram\build\prepare\win.bat skip-release silent ${{ matrix.qt }}
 
