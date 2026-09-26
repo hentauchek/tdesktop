@@ -2240,7 +2240,7 @@ TimeId HistoryItem::scheduleRepeatPeriod() const {
 }
 
 bool HistoryItem::isSponsored() const {
-	return _flags & MessageFlag::Sponsored;
+	return false;
 }
 
 bool HistoryItem::canLookupMessageAuthor() const {
@@ -3299,7 +3299,7 @@ bool HistoryItem::canStopPoll() const {
 }
 
 bool HistoryItem::forbidsForward() const {
-	return (_flags & MessageFlag::NoForwards);
+	return false;
 }
 
 bool HistoryItem::forbidsSaving() const {

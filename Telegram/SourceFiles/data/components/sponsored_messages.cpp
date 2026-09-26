@@ -103,7 +103,7 @@ void SponsoredMessages::clearOldRequests() {
 
 SponsoredMessages::AppendResult SponsoredMessages::append(
 		not_null<History*> history) {
-	if (isTopBarFor(history)) {
+	if (!canHaveFor(history) || isTopBarFor(history)) {
 		return SponsoredMessages::AppendResult::None;
 	}
 	const auto it = _data.find(history);
@@ -273,7 +273,7 @@ HistoryItem *SponsoredMessages::injectItem(
 		not_null<History*> history,
 		not_null<HistoryItem*> after) {
 	const auto it = _data.find(history);
-	if (it == end(_data)) {
+	if (!canHaveFor(history) || it == end(_data)) {
 		return nullptr;
 	}
 	auto &list = it->second;
@@ -302,17 +302,11 @@ HistoryItem *SponsoredMessages::injectItem(
 }
 
 bool SponsoredMessages::canHaveFor(not_null<History*> history) const {
-	if (history->peer->isChannel()) {
-		return true;
-	} else if (const auto user = history->peer->asUser()) {
-		return user->isBot();
-	}
 	return false;
 }
 
 bool SponsoredMessages::canHaveFor(not_null<HistoryItem*> item) const {
-	return item->history()->peer->isBroadcast()
-		&& item->isRegular();
+	return false;
 }
 
 bool SponsoredMessages::isTopBarFor(not_null<History*> history) const {

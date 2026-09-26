@@ -609,7 +609,7 @@ bool UserData::isFake() const {
 }
 
 bool UserData::isPremium() const {
-	return flags() & UserDataFlag::Premium;
+	return true;
 }
 
 bool UserData::isBotInlineGeo() const {
@@ -665,8 +665,7 @@ bool UserData::readDatesPrivate() const {
 }
 
 bool UserData::allowsForwarding() const {
-	return !(flags() & Flag::NoForwardsMyEnabled)
-		&& !(flags() & Flag::NoForwardsPeerEnabled);
+	return true;
 }
 
 void UserData::setNoForwardsFlags(bool myEnabled, bool peerEnabled) {
