@@ -645,13 +645,13 @@ stage('openssl3', """
     git clone -b openssl-3.2.1 https://github.com/openssl/openssl openssl3
     cd openssl3
 win32:
-    perl Configure no-shared no-tests debug-VC-WIN32 /FS
+    perl Configure no-shared no-tests debug-VC-WIN32
 win64:
-    perl Configure no-shared no-tests debug-VC-WIN64A /FS
+    perl Configure no-shared no-tests debug-VC-WIN64A
 winarm:
-    perl Configure no-shared no-tests debug-VC-WIN64-ARM /FS
+    perl Configure no-shared no-tests debug-VC-WIN64-ARM
 win:
-    jom -j%NUMBER_OF_PROCESSORS% build_libs
+    jom -j1 build_libs
     mkdir out.dbg
     move libcrypto.lib out.dbg
     move libssl.lib out.dbg

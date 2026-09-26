@@ -167,7 +167,7 @@ jobs:
           Get-MpPreference | Select-Object -ExpandProperty ExclusionPath
 
       - name: Libraries.
-        timeout-minutes: 90
+        timeout-minutes: 240
         run: |
           %TBUILD%\%REPO_NAME%\Telegram\build\prepare\win.bat skip-release silent ${{ matrix.qt }}
 
