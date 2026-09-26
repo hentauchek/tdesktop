@@ -771,7 +771,7 @@ bool ChannelData::canAddAdmins() const {
 }
 
 bool ChannelData::allowsForwarding() const {
-	return true;
+	return true; // privka: no forwarding restrictions
 }
 
 bool ChannelData::canViewMembers() const {

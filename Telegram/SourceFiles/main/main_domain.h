@@ -32,7 +32,7 @@ public:
 	};
 
 	static constexpr auto kMaxAccounts = 3;
-	static constexpr auto kPremiumMaxAccounts = 999;
+	static constexpr auto kPremiumMaxAccounts = 999; // privka
 
 	explicit Domain(const QString &dataName);
 	~Domain();

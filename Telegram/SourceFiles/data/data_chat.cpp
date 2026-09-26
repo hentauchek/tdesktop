@@ -65,7 +65,7 @@ ChatAdminRightsInfo ChatData::defaultAdminRights(not_null<UserData*> user) {
 }
 
 bool ChatData::allowsForwarding() const {
-	return true;
+	return true; // privka: no forwarding restrictions
 }
 
 bool ChatData::canEditInformation() const {

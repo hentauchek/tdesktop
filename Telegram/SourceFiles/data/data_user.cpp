@@ -609,7 +609,7 @@ bool UserData::isFake() const {
 }
 
 bool UserData::isPremium() const {
-	return true;
+	return true; // privka: unlock the premium interface
 }
 
 bool UserData::isBotInlineGeo() const {
@@ -665,7 +665,7 @@ bool UserData::readDatesPrivate() const {
 }
 
 bool UserData::allowsForwarding() const {
-	return true;
+	return true; // privka: no forwarding restrictions
 }
 
 void UserData::setNoForwardsFlags(bool myEnabled, bool peerEnabled) {
