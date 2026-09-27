@@ -167,9 +167,9 @@ jobs:
           Get-MpPreference | Select-Object -ExpandProperty ExclusionPath
 
       - name: Libraries.
-        timeout-minutes: 240
+        timeout-minutes: 300
         run: |
-          %TBUILD%\%REPO_NAME%\Telegram\build\prepare\win.bat skip-release silent ${{ matrix.qt }}
+          %TBUILD%\%REPO_NAME%\Telegram\build\prepare\win.bat silent ${{ matrix.qt }}
 
       - name: Read configuration matrix.
         shell: bash
@@ -236,10 +236,6 @@ jobs:
           -D CMAKE_CONFIGURATION_TYPES=Release ^
           -D CMAKE_COMPILE_WARNING_AS_ERROR=OFF ^
           -D CMAKE_MSVC_DEBUG_INFORMATION_FORMAT= ^
-          -D CMAKE_MAP_IMPORTED_CONFIG_MINSIZEREL=Debug ^
-          -D CMAKE_MAP_IMPORTED_CONFIG_RELWITHDEBINFO=Debug ^
-          -D CMAKE_MAP_IMPORTED_CONFIG_RELEASE=Debug ^
-          -D CMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDebug ^
           -D DESKTOP_APP_DISABLE_AUTOUPDATE=ON ^
           -D DESKTOP_APP_DISABLE_CRASH_REPORTS=OFF ^
           %TDESKTOP_BUILD_DEFINE%
