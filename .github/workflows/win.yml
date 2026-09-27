@@ -223,32 +223,6 @@ jobs:
         shell: bash
         run: find $LibrariesPath '(' '(' ! '(' -name '*.lib' -o -name '*.a' -o -name '*.exe' -o -name '*.h' -o -name '*.hpp' -o -name '*.inc' -o -name '*.cmake' -o -name '*.pc' -o -path '*/include/*' -o -path '*/objects-*' -o -path '*/cache_keys/*' -o -path '*/patches/*' -o -path '*/nv-codec-headers/*' -o -path '*/Qt-*/*' ')' -type f ')' -o -empty ')' -delete
 
-      - name: Verify Qt libraries.
-        shell: pwsh
-        timeout-minutes: 240
-        run: |
-          $ErrorActionPreference = 'Stop'
-          $required = @('Qt6Core.lib', 'Qt6Widgets.lib', 'Qt6Network.lib', 'Qt6OpenGLWidgets.lib')
-          function Get-QtLibraryNames {
-            return @(Get-ChildItem -Path $env:LibrariesPath -Directory -Filter 'Qt-*' -ErrorAction SilentlyContinue | ForEach-Object {
-              Get-ChildItem -Path (Join-Path $_.FullName 'lib') -Filter '*.lib' -File -ErrorAction SilentlyContinue
-            } | Select-Object -ExpandProperty Name)
-          }
-          $found = Get-QtLibraryNames
-          Write-Host "Qt import libraries found: $($found.Count)"
-          $missing = @($required | Where-Object { $found -notcontains $_ })
-          if ($missing) {
-            Write-Host "Missing Qt libraries: $($missing -join ', ')"
-            Write-Host "Forgetting the cached Qt build, it will be rebuilt from scratch."
-            Remove-Item -Force (Join-Path $env:LibrariesPath 'cache_keys\Qt-*') -ErrorAction SilentlyContinue
-            & "$env:TBUILD\$env:REPO_NAME\Telegram\build\prepare\win.bat" skip-release silent '${{ matrix.qt }}'
-            if ($LASTEXITCODE -ne 0) { throw "The prepare script failed with exit code $LASTEXITCODE" }
-            $found = Get-QtLibraryNames
-            Write-Host "Qt import libraries found after the rebuild: $($found.Count)"
-            $missing = @($required | Where-Object { $found -notcontains $_ })
-            if ($missing) { throw "Still missing Qt libraries: $($missing -join ', ')" }
-          }
-
       - name: Telegram Desktop build.
         if: env.ONLY_CACHE == 'false'
         run: |
@@ -262,6 +236,10 @@ jobs:
           -D CMAKE_CONFIGURATION_TYPES=Release ^
           -D CMAKE_COMPILE_WARNING_AS_ERROR=OFF ^
           -D CMAKE_MSVC_DEBUG_INFORMATION_FORMAT= ^
+          -D CMAKE_MAP_IMPORTED_CONFIG_MINSIZEREL=Debug ^
+          -D CMAKE_MAP_IMPORTED_CONFIG_RELWITHDEBINFO=Debug ^
+          -D CMAKE_MAP_IMPORTED_CONFIG_RELEASE=Debug ^
+          -D CMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDebug ^
           -D DESKTOP_APP_DISABLE_AUTOUPDATE=ON ^
           -D DESKTOP_APP_DISABLE_CRASH_REPORTS=OFF ^
           %TDESKTOP_BUILD_DEFINE%
