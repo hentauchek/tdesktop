@@ -223,6 +223,31 @@ jobs:
         shell: bash
         run: find $LibrariesPath '(' '(' ! '(' -name '*.lib' -o -name '*.a' -o -name '*.exe' -o -name '*.h' -o -name '*.hpp' -o -name '*.inc' -o -name '*.cmake' -o -name '*.pc' -o -path '*/include/*' -o -path '*/objects-*' -o -path '*/cache_keys/*' -o -path '*/patches/*' -o -path '*/nv-codec-headers/*' -o -path '*/Qt-*/*' ')' -type f ')' -o -empty ')' -delete
 
+      - name: Verify Qt libraries.
+        shell: pwsh
+        timeout-minutes: 240
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $required = @('Qt6Core.lib', 'Qt6Widgets.lib', 'Qt6Network.lib', 'Qt6OpenGLWidgets.lib')
+          function Get-MissingQtLibraries {
+            $found = @()
+            Get-ChildItem -Path $env:LibrariesPath -Directory -Filter 'Qt-*' -ErrorAction SilentlyContinue | ForEach-Object {
+              $found += Get-ChildItem -Path (Join-Path $_.FullName 'lib') -Filter '*.lib' -File -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name
+            }
+            return @($required | Where-Object { $found -notcontains $_ })
+          }
+          $missing = Get-MissingQtLibraries
+          Write-Host "Qt libraries present: $($required.Count - $missing.Count) of $($required.Count)"
+          if ($missing) {
+            Write-Host "Missing Qt libraries: $($missing -join ', ')"
+            Get-ChildItem -Path $env:LibrariesPath -Directory -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name
+            Write-Host "Repairing the Qt installation with the prepare script."
+            & "$env:TBUILD\$env:REPO_NAME\Telegram\build\prepare\win.bat" skip-release silent '${{ matrix.qt }}'
+            if ($LASTEXITCODE -ne 0) { throw "The prepare script failed with exit code $LASTEXITCODE" }
+            $missing = Get-MissingQtLibraries
+            if ($missing) { throw "Still missing Qt libraries: $($missing -join ', ')" }
+          }
+
       - name: Telegram Desktop build.
         if: env.ONLY_CACHE == 'false'
         run: |
