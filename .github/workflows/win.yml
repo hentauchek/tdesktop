@@ -229,22 +229,23 @@ jobs:
         run: |
           $ErrorActionPreference = 'Stop'
           $required = @('Qt6Core.lib', 'Qt6Widgets.lib', 'Qt6Network.lib', 'Qt6OpenGLWidgets.lib')
-          function Get-MissingQtLibraries {
-            $found = @()
-            Get-ChildItem -Path $env:LibrariesPath -Directory -Filter 'Qt-*' -ErrorAction SilentlyContinue | ForEach-Object {
-              $found += Get-ChildItem -Path (Join-Path $_.FullName 'lib') -Filter '*.lib' -File -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name
-            }
-            return @($required | Where-Object { $found -notcontains $_ })
+          function Get-QtLibraryNames {
+            return @(Get-ChildItem -Path $env:LibrariesPath -Directory -Filter 'Qt-*' -ErrorAction SilentlyContinue | ForEach-Object {
+              Get-ChildItem -Path (Join-Path $_.FullName 'lib') -Filter '*.lib' -File -ErrorAction SilentlyContinue
+            } | Select-Object -ExpandProperty Name)
           }
-          $missing = Get-MissingQtLibraries
-          Write-Host "Qt libraries present: $($required.Count - $missing.Count) of $($required.Count)"
+          $found = Get-QtLibraryNames
+          Write-Host "Qt import libraries found: $($found.Count)"
+          $missing = @($required | Where-Object { $found -notcontains $_ })
           if ($missing) {
             Write-Host "Missing Qt libraries: $($missing -join ', ')"
-            Get-ChildItem -Path $env:LibrariesPath -Directory -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name
-            Write-Host "Repairing the Qt installation with the prepare script."
+            Write-Host "Forgetting the cached Qt build, it will be rebuilt from scratch."
+            Remove-Item -Force (Join-Path $env:LibrariesPath 'cache_keys\Qt-*') -ErrorAction SilentlyContinue
             & "$env:TBUILD\$env:REPO_NAME\Telegram\build\prepare\win.bat" skip-release silent '${{ matrix.qt }}'
             if ($LASTEXITCODE -ne 0) { throw "The prepare script failed with exit code $LASTEXITCODE" }
-            $missing = Get-MissingQtLibraries
+            $found = Get-QtLibraryNames
+            Write-Host "Qt import libraries found after the rebuild: $($found.Count)"
+            $missing = @($required | Where-Object { $found -notcontains $_ })
             if ($missing) { throw "Still missing Qt libraries: $($missing -join ', ')" }
           }
 
