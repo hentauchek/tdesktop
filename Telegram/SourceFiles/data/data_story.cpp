@@ -16,6 +16,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "data/data_media_preload.h"
 #include "data/data_photo.h"
 #include "data/data_photo_media.h"
+#include "data/data_privka.h"
 #include "data/data_user.h"
 #include "data/data_session.h"
 #include "data/data_stories.h"
@@ -420,12 +421,15 @@ bool Story::out() const {
 }
 
 bool Story::canDownloadIfPremium() const {
-	return !forbidsForward() || _peer->isSelf();
+	return Data::PrivkaEnabled(Data::PrivkaFeature::SaveStories)
+		|| !forbidsForward()
+		|| _peer->isSelf();
 }
 
 bool Story::canDownloadChecked() const {
 	return _peer->isSelf()
-		|| (canDownloadIfPremium() && _peer->session().premium());
+		|| (canDownloadIfPremium() && _peer->session().premium())
+		|| Data::PrivkaEnabled(Data::PrivkaFeature::SaveStories);
 }
 
 bool Story::canShare() const {

@@ -85,6 +85,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "data/data_media_types.h"
 #include "data/data_poll.h"
 #include "data/data_forum_topic.h"
+#include "data/data_privka.h"
 #include "data/data_session.h"
 #include "data/data_stories.h"
 #include "data/data_groups.h"
@@ -1441,6 +1442,26 @@ void AddCopyLinkAction(
 		&st::menuIconCopy);
 }
 
+void AddPrivkaEntityActions(
+		not_null<Ui::PopupMenu*> menu,
+		not_null<HistoryItem*> item) {
+	const auto entities = Data::PrivkaEntities(item->originalText().text);
+	if (entities.empty()) {
+		return;
+	}
+	menu->addSeparator(&st::expandedMenuSeparator);
+	for (const auto &entity : entities) {
+		const auto value = entity.value;
+		menu->addAction(
+			tr::lng_privka_copy_entity(tr::now, lt_entity, value),
+			[=] {
+				TextUtilities::SetClipboardText(
+					TextForMimeData::Simple(value));
+			},
+			&st::menuIconCopy);
+	}
+}
+
 void EditTagBox(
 		not_null<Ui::GenericBox*> box,
 		not_null<Window::SessionController*> controller,
@@ -1937,6 +1958,9 @@ void FillContextMenuItems(
 	}
 
 	AddCopyLinkAction(result, link);
+	if (item && !hasSelection) {
+		AddPrivkaEntityActions(result, item);
+	}
 	AddMessageActions(result, request, list);
 
 	const auto wasAmount = result->actions().size();

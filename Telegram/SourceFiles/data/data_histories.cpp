@@ -19,6 +19,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "data/data_folder.h"
 #include "data/data_forum.h"
 #include "data/data_forum_topic.h"
+#include "data/data_privka.h"
 #include "data/data_saved_music.h"
 #include "data/data_saved_sublist.h"
 #include "data/data_session.h"
@@ -172,23 +173,23 @@ void Histories::clearAll() {
 	_map.clear();
 }
 
-void Histories::readInbox(not_null<History*> history) {
+void Histories::readInbox(not_null<History*> history, bool manual) {
 	DEBUG_LOG(("Reading: readInbox called."));
 	if (history->lastServerMessageKnown()) {
 		const auto last = history->lastServerMessage();
 		DEBUG_LOG(("Reading: last known, reading till %1."
 			).arg(last ? last->id.bare : 0));
-		readInboxTill(history, last ? last->id : 0);
+		readInboxTill(history, last ? last->id : 0, manual);
 		return;
 	} else if (history->loadedAtBottom()) {
 		if (const auto lastId = history->maxMsgId()) {
 			DEBUG_LOG(("Reading: loaded at bottom, maxMsgId %1."
 				).arg(lastId.bare));
-			readInboxTill(history, lastId);
+			readInboxTill(history, lastId, manual);
 			return;
 		} else if (history->loadedAtTop()) {
 			DEBUG_LOG(("Reading: loaded at bottom, loaded at top."));
-			readInboxTill(history, 0);
+			readInboxTill(history, 0, manual);
 			return;
 		}
 		DEBUG_LOG(("Reading: loaded at bottom, but requesting entry."));
@@ -199,7 +200,7 @@ void Histories::readInbox(not_null<History*> history) {
 		const auto last = history->lastServerMessage();
 		DEBUG_LOG(("Reading: got entry, reading till %1."
 			).arg(last ? last->id.bare : 0));
-		readInboxTill(history, last ? last->id : 0);
+		readInboxTill(history, last ? last->id : 0, manual);
 	});
 }
 
@@ -242,14 +243,26 @@ void Histories::readInboxTill(not_null<HistoryItem*> item) {
 }
 
 void Histories::readInboxTill(not_null<History*> history, MsgId tillId) {
-	readInboxTill(history, tillId, false);
+	readInboxTill(history, tillId, false, false);
 }
 
 void Histories::readInboxTill(
 		not_null<History*> history,
 		MsgId tillId,
-		bool force) {
+		bool manual) {
+	readInboxTill(history, tillId, false, manual);
+}
+
+void Histories::readInboxTill(
+		not_null<History*> history,
+		MsgId tillId,
+		bool force,
+		bool manual) {
 	Expects(IsServerMsgId(tillId) || (!tillId && !force));
+
+	if (!manual && Data::PrivkaEnabled(Data::PrivkaFeature::ManualRead)) {
+		return;
+	}
 
 	DEBUG_LOG(("Reading: readInboxTill %1, force %2."
 		).arg(tillId.bare
@@ -343,7 +356,7 @@ void Histories::readInboxOnNewMessage(not_null<HistoryItem*> item) {
 	if (!item->isRegular()) {
 		readClientSideMessage(item);
 	} else {
-		readInboxTill(item->history(), item->id, true);
+		readInboxTill(item->history(), item->id, true, false);
 	}
 }
 

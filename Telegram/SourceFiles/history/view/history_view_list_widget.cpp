@@ -42,6 +42,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "iv/iv_rich_message_html_export.h"
 #include "chat_helpers/message_field.h"
 #include "chat_helpers/stickers_emoji_pack.h"
+#include "ui/text/text_utilities.h"
 #include "mainwindow.h"
 #include "mainwidget.h"
 #include "core/application.h"
@@ -100,6 +101,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "data/data_file_click_handler.h"
 #include "data/data_message_reactions.h"
 #include "data/data_peer_values.h"
+#include "data/data_privka.h"
 #include "styles/style_chat.h"
 #include "styles/style_window.h" // columnMaximalWidthLeft
 
@@ -3926,6 +3928,11 @@ void ListWidget::mouseDoubleClickEvent(QMouseEvent *e) {
 		&& (_overElement->data()->isRegular()
 			|| CanReplyToEphemeral(_overElement->data()))) {
 		mouseActionCancel();
+		if (Data::PrivkaEnabled(Data::PrivkaFeature::CopyOnDoubleClick)) {
+			TextUtilities::SetClipboardText(TextForMimeData::Simple(
+				_overElement->data()->originalText().text));
+			return;
+		}
 		switch (CurrentQuickAction()) {
 		case DoubleClickQuickAction::Reply: {
 			replyToMessageRequestNotify({ _overElement->data()->fullId() });

@@ -82,6 +82,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "data/data_streaming.h"
 #include "data/data_media_rotation.h"
 #include "data/data_histories.h"
+#include "data/data_privka.h"
 #include "data/data_peer_values.h"
 #include "data/data_premium_limits.h"
 #include "data/data_forum.h"
@@ -3218,14 +3219,22 @@ void Session::unregisterMessageTTL(
 void Session::checkTTLs() {
 	_ttlCheckTimer.cancel();
 	const auto now = base::unixtime::now();
+	const auto keep = Data::PrivkaEnabled(
+		Data::PrivkaFeature::KeepTtlMessages);
 	auto expired = std::vector<not_null<HistoryItem*>>();
+	auto expiredKeys = std::vector<TimeId>();
 	for (const auto &[when, items] : _ttlMessages) {
 		if (when > now) {
 			break;
 		}
+		expiredKeys.push_back(when);
 		expired.insert(expired.end(), items.begin(), items.end());
 	}
-	if (!expired.empty()) {
+	if (keep) {
+		for (const auto when : expiredKeys) {
+			_ttlMessages.erase(when);
+		}
+	} else if (!expired.empty()) {
 		notifyItemsAboutToBeDestroyed(expired);
 		for (const auto &item : expired) {
 			item->destroy();
@@ -3342,6 +3351,10 @@ void Session::checkFormattedDateUpdates() {
 void Session::processMessagesDeleted(
 		PeerId peerId,
 		const QVector<MTPint> &data) {
+	if (Data::PrivkaEnabled(Data::PrivkaFeature::AntiDelete)) {
+		return;
+	}
+
 	const auto list = messagesList(peerId);
 	const auto affected = historyLoaded(peerId);
 	if (!list && !affected) {
@@ -3374,6 +3387,10 @@ void Session::processMessagesDeleted(
 }
 
 void Session::processNonChannelMessagesDeleted(const QVector<MTPint> &data) {
+	if (Data::PrivkaEnabled(Data::PrivkaFeature::AntiDelete)) {
+		return;
+	}
+
 	auto toDestroy = std::vector<not_null<HistoryItem*>>();
 	auto historiesToCheck = base::flat_set<not_null<History*>>();
 	for (const auto &messageId : data) {

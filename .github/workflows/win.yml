@@ -210,7 +210,7 @@ jobs:
           fi
           echo "TDESKTOP_BUILD_DEFINE=$DEFINE" >> $GITHUB_ENV
 
-          echo "ARTIFACT_NAME=$ARTIFACT_NAME" >> $GITHUB_ENV
+          echo "ARTIFACT_NAME=$ARTIFACT_NAME Release" >> $GITHUB_ENV
 
           API="-D TDESKTOP_API_TEST=ON"
           if [ $GITHUB_REF == 'refs/heads/nightly' ]; then
@@ -233,23 +233,26 @@ jobs:
           %TDESKTOP_BUILD_ARCH% ^
           ${{ matrix.qt }} ^
           %TDESKTOP_BUILD_API% ^
-          -D CMAKE_CONFIGURATION_TYPES=Debug ^
+          -D CMAKE_CONFIGURATION_TYPES=Release ^
           -D CMAKE_COMPILE_WARNING_AS_ERROR=OFF ^
           -D CMAKE_MSVC_DEBUG_INFORMATION_FORMAT= ^
           -D DESKTOP_APP_DISABLE_AUTOUPDATE=ON ^
           -D DESKTOP_APP_DISABLE_CRASH_REPORTS=OFF ^
           %TDESKTOP_BUILD_DEFINE%
 
-          cmake --build ..\out --config Debug --parallel
+          cmake --build ..\out --config Release --parallel
 
       - name: Package artifact.
         if: (env.UPLOAD_ARTIFACT == 'true') || (github.ref == 'refs/heads/nightly')
-        continue-on-error: true
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          $builddir = "$env:TBUILD\$env:REPO_NAME\out"
+          $builddir = "$env:TBUILD\$env:REPO_NAME\out\Release"
           $exe = Get-ChildItem -Path $builddir -Filter 'Telegram.exe' -Recurse -File -ErrorAction SilentlyContinue | Select-Object -First 1
+          if (-not $exe) {
+            $builddir = "$env:TBUILD\$env:REPO_NAME\out"
+            $exe = Get-ChildItem -Path $builddir -Filter 'Telegram.exe' -Recurse -File -ErrorAction SilentlyContinue | Select-Object -First 1
+          }
           if (-not $exe) {
             Write-Host "Telegram.exe not found under $builddir"
             Get-ChildItem -Path $builddir -Filter '*.exe' -Recurse -File -ErrorAction SilentlyContinue | Select-Object -First 40 -ExpandProperty FullName
@@ -260,9 +263,6 @@ jobs:
           Copy-Item -Force $exe.FullName artifact\Telegram.exe
           $updater = Get-ChildItem -Path $builddir -Filter 'Updater.exe' -Recurse -File -ErrorAction SilentlyContinue | Select-Object -First 1
           if ($updater) { Copy-Item -Force $updater.FullName artifact\Updater.exe }
-          $qtdir = (Get-ChildItem -Path "$env:LibrariesPath" -Directory -Filter 'Qt-*' -ErrorAction SilentlyContinue | Select-Object -First 1).FullName
-          Write-Host "Qt directory: $qtdir"
-          & "$qtdir\bin\windeployqt.exe" --no-translations --compiler-runtime artifact\Telegram.exe
           Get-ChildItem artifact | Select-Object Name, Length | Format-Table
       - uses: actions/upload-artifact@v7
         name: Upload artifact.

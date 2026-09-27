@@ -14,6 +14,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "data/data_channel.h"
 #include "data/data_document.h"
 #include "data/data_media_types.h"
+#include "data/data_privka.h"
 #include "data/data_session.h"
 #include "data/data_stories.h"
 #include "data/data_stories_ids.h"
@@ -441,7 +442,7 @@ void Provider::applyDragSelection(
 bool Provider::allowSaveFileAs(
 		not_null<const HistoryItem*> item,
 		not_null<DocumentData*> document) {
-	return false;
+	return Data::PrivkaEnabled(Data::PrivkaFeature::SaveStories);
 }
 
 QString Provider::showInFolderPath(

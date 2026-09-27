@@ -17,6 +17,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "data/data_group_call.h"
 #include "data/data_folder.h"
 #include "data/data_photo.h"
+#include "data/data_privka.h"
 #include "data/data_user.h"
 #include "data/data_session.h"
 #include "history/history.h"
@@ -1233,6 +1234,10 @@ void Stories::loadAround(FullStoryId id, StoriesContext context) {
 }
 
 void Stories::markAsRead(FullStoryId id, bool viewed) {
+	if (Data::PrivkaEnabled(Data::PrivkaFeature::NoStoriesRead)) {
+		return;
+	}
+
 	if (id.peer == _owner->session().userPeerId()) {
 		return;
 	}

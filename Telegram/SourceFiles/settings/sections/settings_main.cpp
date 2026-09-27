@@ -57,6 +57,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "settings/sections/settings_notifications.h"
 #include "settings/settings_power_saving.h"
 #include "settings/sections/settings_premium.h"
+#include "settings/sections/settings_privka.h"
 #include "settings/sections/settings_privacy_security.h"
 #include "settings/settings_scale_preview.h"
 #include "storage/localstorage.h"
@@ -428,6 +429,13 @@ void BuildSectionButtons(SectionBuilder &builder) {
 			.shown = std::move(shownProducer),
 		});
 	}
+
+	builder.addSectionButton({
+		.title = tr::lng_settings_privka_title(),
+		.targetSection = PrivkaId(),
+		.icon = { &st::menuIconLock },
+		.keywords = { u"privka"_q, u"features"_q, u"anti-delete"_q },
+	});
 
 	builder.addSectionButton({
 		.title = tr::lng_settings_advanced(),

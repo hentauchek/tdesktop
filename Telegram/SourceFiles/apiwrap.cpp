@@ -57,6 +57,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "data/data_forum.h"
 #include "data/data_message_reaction_id.h"
 #include "data/data_premium_limits.h"
+#include "data/data_privka.h"
 #include "data/data_saved_messages.h"
 #include "data/data_saved_music.h"
 #include "data/data_saved_sublist.h"
@@ -1436,6 +1437,10 @@ void ApiWrap::migrateFail(not_null<PeerData*> peer, const QString &error) {
 
 void ApiWrap::markContentsRead(
 		const base::flat_set<not_null<HistoryItem*>> &items) {
+	if (Data::PrivkaEnabled(Data::PrivkaFeature::ManualRead)) {
+		return;
+	}
+
 	auto markedIds = QVector<MTPint>();
 	auto channelMarkedIds = base::flat_map<
 		not_null<ChannelData*>,
@@ -1467,6 +1472,10 @@ void ApiWrap::markContentsRead(
 }
 
 void ApiWrap::markContentsRead(not_null<HistoryItem*> item) {
+	if (Data::PrivkaEnabled(Data::PrivkaFeature::ManualRead)) {
+		return;
+	}
+
 	if (!item->markContentsRead(true) || !item->isRegular()) {
 		return;
 	}

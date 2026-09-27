@@ -758,6 +758,8 @@ PRIVATE
     data/data_poll_messages.h
     data/data_premium_limits.cpp
     data/data_premium_limits.h
+    data/data_privka.cpp
+    data/data_privka.h
     data/data_pts_waiter.cpp
     data/data_pts_waiter.h
     data/data_replies_list.cpp
@@ -1893,6 +1895,8 @@ PRIVATE
     settings/settings_power_saving.h
     settings/sections/settings_premium.cpp
     settings/sections/settings_premium.h
+    settings/sections/settings_privka.cpp
+    settings/sections/settings_privka.h
     settings/settings_privacy_controllers.cpp
     settings/settings_privacy_controllers.h
     settings/settings_scale_preview.cpp
