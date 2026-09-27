@@ -2048,11 +2048,11 @@ void Application::RegisterUrlScheme() {
 		.executable = Platform::ExecutablePathForShortcuts(),
 		.arguments = arguments,
 		.protocol = u"tg"_q,
-		.protocolName = u"Telegram Link"_q,
+		.protocolName = u"NoneGram Link"_q,
 		.shortAppName = u"tdesktop"_q,
 		.longAppName = QCoreApplication::applicationName(),
-		.displayAppName = AppName.utf16(),
-		.displayAppDescription = AppName.utf16(),
+		.displayAppName = AppDisplayName.utf16(),
+		.displayAppDescription = AppDisplayName.utf16(),
 	});
 
 	base::Platform::RegisterUrlScheme(base::Platform::UrlSchemeDescriptor{
@@ -2062,8 +2062,8 @@ void Application::RegisterUrlScheme() {
 		.protocolName = u"TonSite Link"_q,
 		.shortAppName = u"tdesktop"_q,
 		.longAppName = QCoreApplication::applicationName(),
-		.displayAppName = AppName.utf16(),
-		.displayAppDescription = AppName.utf16(),
+		.displayAppName = AppDisplayName.utf16(),
+		.displayAppDescription = AppDisplayName.utf16(),
 	});
 }
 

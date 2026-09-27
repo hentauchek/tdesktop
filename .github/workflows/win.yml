@@ -174,7 +174,7 @@ jobs:
       - name: Read configuration matrix.
         shell: bash
         run: |
-          ARTIFACT_NAME="Telegram"
+          ARTIFACT_NAME="NoneGram"
 
           ARCH=""
           if [ -n "${{ matrix.arch }}" ]; then
@@ -248,19 +248,19 @@ jobs:
         run: |
           $ErrorActionPreference = 'Stop'
           $builddir = "$env:TBUILD\$env:REPO_NAME\out\Release"
-          $exe = Get-ChildItem -Path $builddir -Filter 'Telegram.exe' -Recurse -File -ErrorAction SilentlyContinue | Select-Object -First 1
+          $exe = Get-ChildItem -Path $builddir -Filter 'NoneGram.exe' -Recurse -File -ErrorAction SilentlyContinue | Select-Object -First 1
           if (-not $exe) {
             $builddir = "$env:TBUILD\$env:REPO_NAME\out"
-            $exe = Get-ChildItem -Path $builddir -Filter 'Telegram.exe' -Recurse -File -ErrorAction SilentlyContinue | Select-Object -First 1
+            $exe = Get-ChildItem -Path $builddir -Filter 'NoneGram.exe' -Recurse -File -ErrorAction SilentlyContinue | Select-Object -First 1
           }
           if (-not $exe) {
-            Write-Host "Telegram.exe not found under $builddir"
+            Write-Host "NoneGram.exe not found under $builddir"
             Get-ChildItem -Path $builddir -Filter '*.exe' -Recurse -File -ErrorAction SilentlyContinue | Select-Object -First 40 -ExpandProperty FullName
             exit 1
           }
           Write-Host "Using $($exe.FullName)"
           New-Item -ItemType Directory -Force -Path artifact | Out-Null
-          Copy-Item -Force $exe.FullName artifact\Telegram.exe
+          Copy-Item -Force $exe.FullName artifact\NoneGram.exe
           $updater = Get-ChildItem -Path $builddir -Filter 'Updater.exe' -Recurse -File -ErrorAction SilentlyContinue | Select-Object -First 1
           if ($updater) { Copy-Item -Force $updater.FullName artifact\Updater.exe }
           Get-ChildItem artifact | Select-Object Name, Length | Format-Table
