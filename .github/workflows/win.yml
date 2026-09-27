@@ -145,8 +145,9 @@ jobs:
             !${{ env.LibrariesPath }}\[qQ]t[_-]*
             ${{ env.LibrariesPath }}\cache_keys\*
             !${{ env.LibrariesPath }}\cache_keys\[qQ]t[_-]*
-          key: ${{ runner.OS }}-${{ matrix.arch }}-libs-v2-${{ env.CACHE_KEY }}
-          restore-keys: ${{ runner.OS }}-${{ matrix.arch }}-libs-v2-
+                    key: ${{ runner.OS }}-${{ matrix.arch }}-libs-v3-${{ env.CACHE_KEY }}
+          restore-keys: ${{ runner.OS }}-${{ matrix.arch }}-libs-
+v2-
 
       - name: Qt cache.
         id: cache-qt
@@ -155,7 +156,7 @@ jobs:
           path: |
             ${{ env.LibrariesPath }}\[qQ]t[_-]*
             ${{ env.LibrariesPath }}\cache_keys\[qQ]t[_-]*
-          key: ${{ runner.OS }}-${{ matrix.arch }}-${{ matrix.qt || 'qt' }}-${{ env.CACHE_KEY }}
+          key: ${{ runner.OS }}-${{ matrix.arch }}-${{ matrix.qt || 'qt' }}-v2-${{ env.CACHE_KEY }}
           restore-keys: ${{ runner.OS }}-${{ matrix.arch }}-${{ matrix.qt || 'qt' }}-
 
       - name: Disable Defender.

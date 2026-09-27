@@ -199,11 +199,11 @@ QString PrivkaEntityTypeTitle(PrivkaEntityType type) {
 }
 
 std::vector<PrivkaEntity> PrivkaEntities(const QString &text) {
-	const auto result = std::vector<PrivkaEntity>();
+	auto result = std::vector<PrivkaEntity>();
 	if (text.isEmpty()) {
 		return result;
 	}
-	const auto urlSpans = std::vector<std::pair<int, int>>();
+	auto urlSpans = std::vector<std::pair<int, int>>();
 	const auto collect = [&](
 			PrivkaEntityType type,
 			const QRegularExpression &expression,
