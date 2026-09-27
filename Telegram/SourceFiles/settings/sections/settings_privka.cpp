@@ -24,6 +24,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 namespace Settings {
 namespace {
 
+using namespace Builder;
+
 const auto kKeywordPrivka = u"privka"_q;
 
 void AddFeatureCheckbox(
