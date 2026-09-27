@@ -291,6 +291,16 @@ void CloudManager::applyLangPackDifference(
 	const auto &langpack = difference.c_langPackDifference();
 	const auto langpackId = qs(langpack.vlang_code());
 	const auto pack = packTypeFromId(langpackId);
+	// WHY: the base pack carries the rebranded strings, and the cloud pack
+	// still ships the original wording, so accepting it would undo the rename.
+	if (pack == Pack::Base
+		|| (pack == Pack::Current
+			&& LanguageIdOrDefault(_langpack.id()) == DefaultLanguageId())) {
+		if (_restartAfterSwitch) {
+			restartAfterSwitch();
+		}
+		return;
+	}
 	if (pack != Pack::None) {
 		applyLangPackData(pack, langpack);
 		if (_restartAfterSwitch) {
