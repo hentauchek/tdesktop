@@ -149,6 +149,10 @@ style::colorizer ColorizerFrom(
 		} };
 		result.lightnessMin = 64;
 		break;
+	case EmbeddedType::NightBlack:
+		// The black palette is the Night Green one with the dark surfaces
+		// scaled down, so the accent colorizer is left exactly the same.
+	[[fallthrough]];
 	case EmbeddedType::NightGreen:
 		result.keepContrast = base::flat_map<QLatin1String, Pair>{ {
 			//{ qstr("windowFgActive"), Pair{ cColor("3fc1b0"), cColor("282e33") } }, // windowBgActive, windowBg
@@ -281,6 +285,17 @@ std::vector<EmbeddedScheme> EmbeddedThemes() {
 			":/gui/night-green.tdesktop-theme",
 			qColor("3fc1b0")
 		},
+		EmbeddedScheme{
+			EmbeddedType::NightBlack,
+			qColor("000000"),
+			qColor("0a0c0d"),
+			qColor("0a0c0d"),
+			qColor("0a0c0d"),
+			qColor("0d0e10"),
+			name(tr::lng_settings_theme_black),
+			":/gui/night-black.tdesktop-theme",
+			qColor("3fc1b0")
+		},
 	};
 }
 
@@ -323,6 +338,17 @@ std::vector<QColor> DefaultAccentColors(EmbeddedType type) {
 			qColor("9b834b"),
 		};
 	case EmbeddedType::NightGreen:
+		return {
+			qColor("60a8e7"),
+			qColor("4e9c57"),
+			qColor("ca7896"),
+			qColor("cc925c"),
+			qColor("a58ed2"),
+			qColor("d27570"),
+			qColor("7b8799"),
+			qColor("cbac67"),
+		};
+	case EmbeddedType::NightBlack:
 		return {
 			qColor("60a8e7"),
 			qColor("4e9c57"),
@@ -421,6 +447,7 @@ bool AccentColors::setFromSerialized(const QByteArray &serialized) {
 		case EmbeddedType::DayBlue:
 		case EmbeddedType::Night:
 		case EmbeddedType::NightGreen:
+		case EmbeddedType::NightBlack:
 			data.emplace(uncheckedType, color);
 			break;
 		default:

@@ -1227,16 +1227,17 @@ void InitialLoadTheme() {
 }
 
 bool ApplyDefaultNightMode() {
-	const auto NightByDefault = Platform::IsMacStoreBuild();
-	if (!NightByDefault
-		|| Window::Theme::IsNightMode()
+	// WHY: NoneGram ships a black theme, so a fresh profile starts on it
+	// instead of the light default. A profile that already has a saved
+	// theme is left alone.
+	if (Window::Theme::IsNightMode()
 		|| _themeKeyDay
 		|| _themeKeyNight
 		|| _themeKeyLegacy) {
 		return false;
 	}
 	Core::App().startSettingsAndBackground();
-	Window::Theme::ToggleNightMode();
+	Window::Theme::ToggleNightMode(Window::Theme::BlackThemePath());
 	Window::Theme::KeepApplied();
 	return true;
 }
